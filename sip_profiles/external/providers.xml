@@ -1,0 +1,61 @@
+<include>
+  <!-- Provider 1 Incoming -->
+  <gateway name="provider1_incoming">
+    <param name="username" value="your_username1"/>
+    <param name="password" value="your_password1"/>
+    <param name="realm" value="sip1.provider1.com"/>
+    <param name="proxy" value="sip1.provider1.com"/>
+    <param name="register" value="false"/>
+    <param name="retry-seconds" value="30"/>
+    <param name="context" value="public"/>
+  </gateway>
+  
+  <!-- Provider 1 Outgoing -->
+  <gateway name="provider1_outgoing">
+    <param name="username" value="out_username1"/>
+    <param name="password" value="out_password1"/>
+    <param name="realm" value="sip-out1.provider1.com"/>
+    <param name="proxy" value="sip-out1.provider1.com"/>
+    <param name="register" value="false"/>
+  </gateway>
+  
+  <!-- Provider 2 Incoming -->
+  <gateway name="provider2_incoming">
+    <param name="username" value="your_username2"/>
+    <param name="password" value="your_password2"/>
+    <param name="realm" value="sip2.provider2.com"/>
+    <param name="proxy" value="sip2.provider2.com"/>
+    <param name="register" value="false"/>
+    <param name="retry-seconds" value="30"/>
+    <param name="context" value="public"/>
+  </gateway>
+  
+  <!-- Provider 2 Outgoing -->
+  <gateway name="provider2_outgoing">
+    <param name="username" value="out_username2"/>
+    <param name="password" value="out_password2"/>
+    <param name="realm" value="sip-out2.provider2.com"/>
+    <param name="proxy" value="sip-out2.provider2.com"/>
+    <param name="register" value="false"/>
+  </gateway>
+  
+  <!-- Free Telecom Incoming Trunk -->
+  <gateway name="freetelecom_incoming">
+    <param name="username" value="freetelecom"/>
+    <param name="realm" value="185.105.176.12"/>
+    <param name="proxy" value="185.105.176.12"/>
+    <param name="register" value="false"/>
+    <param name="context" value="public"/>
+    <param name="caller-id-in-from" value="false"/>
+    <param name="ping" value="30"/>
+  </gateway>
+
+  <!-- Free Telecom Outgoing Trunk -->
+  <gateway name="freetelecom_outgoing">
+    <param name="realm" value="185.105.176.12"/>
+    <param name="proxy" value="185.105.176.12"/>
+    <param name="register" value="false"/>
+    <param name="caller-id-in-from" value="true"/>
+    <param name="ping" value="30"/>
+  </gateway>
+</include>

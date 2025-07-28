@@ -1,0 +1,22 @@
+<include>
+  <!-- HTTP-based outbound routing -->
+  <extension name="http_outbound_routing">
+    <condition field="destination_number" expression="^([0-9]{7,15})$">
+      <!-- Log outgoing call -->
+      <action application="log" data="INFO HTTP Routing: Outgoing call from ${caller_id_number} to ${destination_number}"/>
+      
+      <!-- Set call variables -->
+      <action application="set" data="hangup_after_bridge=true"/>
+      <action application="set" data="continue_on_fail=true"/>
+      
+      <!-- Call Lua script for HTTP routing -->
+      <action application="lua" data="http_routing.lua"/>
+      
+      <!-- Set caller ID based on routing response -->
+      <action application="set" data="effective_caller_id_number=${routing_cid}"/>
+      
+      <!-- Bridge call using routing information -->
+      <action application="bridge" data="sofia/gateway/${routing_provider}/${routing_did}"/>
+    </condition>
+  </extension>
+</include>

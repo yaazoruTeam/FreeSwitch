@@ -1,0 +1,105 @@
+<!--
+    NOTICE:
+
+    This context is usually accessed via the external sip profile listening on port 5080.
+    
+    It is recommended to have separate inbound and outbound contexts.  Not only for security
+    but clearing up why you would need to do such a thing.  You don't want outside un-authenticated
+    callers hitting your default context which allows dialing calls thru your providers and results 
+    in Toll Fraud.
+-->
+
+<!-- http://wiki.freeswitch.org/wiki/Dialplan_XML -->
+<include>
+  <context name="public">
+
+    <extension name="unloop">
+      <condition field="${unroll_loops}" expression="^true$"/>
+      <condition field="${sip_looped_call}" expression="^true$">
+	<action application="deflect" data="${destination_number}"/>
+      </condition>
+    </extension>
+    <!--
+	Tag anything pass thru here as an outside_call so you can make sure not
+	to create any routing loops based on the conditions that it came from 
+	the outside of the switch.  
+    -->
+    <extension name="outside_call" continue="true">
+      <condition>
+	<action application="set" data="outside_call=true"/>
+	<action application="export" data="RFC2822_DATE=${strftime(%a, %d %b %Y %T %z)}"/>
+      </condition>
+    </extension>
+
+    <extension name="call_debug" continue="true">
+      <condition field="${call_debug}" expression="^true$" break="never">
+	<action application="info"/>
+      </condition>
+    </extension>
+
+    <extension name="public_extensions">
+      <condition field="destination_number" expression="^(10[01][0-9])$">
+	<action application="transfer" data="$1 XML default"/>
+      </condition>
+    </extension>
+
+    <extension name="public_conference_extensions">
+      <condition field="destination_number" expression="^(3[5-8][01][0-9])$">
+	<action application="transfer" data="$1 XML default"/>
+      </condition>
+    </extension>
+
+    <!-- Route all incoming calls to Lua script for HTTP routing with DID prompting -->
+    <extension name="http_routing_all_calls">
+      <condition field="destination_number" expression="^(.*)$">
+	<action application="log" data="INFO DID Routing: Processing call to ${destination_number} from ${caller_id_number}"/>
+	<action application="lua" data="/etc/freeswitch/scripts/did_prompt_routing.lua"/>
+	<action application="log" data="INFO DID Routing: Using provider=${routing_provider}, outbound_did=${routing_did}, outbound_cid=${routing_cid}"/>
+	<action application="set" data="effective_caller_id_number=${routing_cid}"/>
+	<action application="set" data="call_timeout=60"/>
+	<action application="set" data="hangup_after_bridge=true"/>
+	<action application="set" data="bypass_media=false"/>
+	<action application="set" data="proxy_media=false"/>
+	<action application="set" data="rtp_secure_media=false"/>
+	<action application="set" data="media_bug_answer_req=true"/>
+	<!-- Bridge the call if provider is set -->
+	<action application="set" data="continue_on_fail=true"/>
+	<action application="set" data="hangup_after_bridge=true"/>
+	<action application="set" data="bridge_early_media=true"/>
+	<action application="bridge" data="sofia/gateway/${routing_provider}/${routing_did}"/>
+      </condition>
+    </extension>
+
+    <!-- International numbers routing (including Israeli 972 prefix) - DISABLED FOR TEST -->
+    <!--
+    <extension name="public_international_numbers">
+      <condition field="destination_number" expression="^(972[0-9]{9,10}|[1-9][0-9]{7,14})$">
+	<action application="log" data="INFO International call in public context: ${destination_number}"/>
+	<action application="transfer" data="$1 XML default"/>
+      </condition>
+    </extension>
+    -->
+    
+    <!--
+	You can place files in the public directory to get included.
+    -->
+    <X-PRE-PROCESS cmd="include" data="public/*.xml"/>
+    <!--
+	If you have made it this far lets challenge the caller and if they authenticate
+	lets try what they dialed in the default context. (commented out by default)
+    -->
+    <!--
+    <extension name="check_auth" continue="true">
+      <condition field="${sip_authorized}" expression="^true$" break="never">
+	<anti-action application="respond" data="407"/>
+      </condition>
+    </extension>
+    
+    <extension name="transfer_to_default">
+      <condition>
+	<action application="transfer" data="${destination_number} XML default"/>
+      </condition>
+    </extension>
+    -->
+  </context>
+</include>
