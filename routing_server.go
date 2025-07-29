@@ -56,13 +56,13 @@ type CallLogResponse struct {
 func routeHandler(w http.ResponseWriter, r *http.Request) {
 	// Log the incoming request
 	log.Printf("Received routing request from %s", r.RemoteAddr)
-	
+
 	// Only accept POST requests
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	
+
 	// Parse JSON request
 	var req RoutingRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -70,19 +70,19 @@ func routeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
-	
+
 	log.Printf("Routing request: DID=%s, CID=%s", req.DID, req.CID)
-	
+
 	// Apply routing logic
 	response := routeCall(req.DID, req.CID)
-	
+
 	// Log the response
-	log.Printf("Routing response: Provider=%s, OutboundDID=%s, OutboundCID=%s", 
+	log.Printf("Routing response: Provider=%s, OutboundDID=%s, OutboundCID=%s",
 		response.Provider, response.OutboundDID, response.OutboundCID)
-	
+
 	// Set response headers
 	w.Header().Set("Content-Type", "application/json")
-	
+
 	// Send JSON response
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Printf("Error encoding JSON response: %v", err)
@@ -99,7 +99,7 @@ func routeCall(did, cid string) RoutingResponse {
 		OutboundDID: did,
 		OutboundCID: cid,
 	}
-	
+
 	// Apply specific routing rules
 	switch did {
 	case "972792026281":
@@ -108,7 +108,7 @@ func routeCall(did, cid string) RoutingResponse {
 		response.OutboundDID = "18454289532"
 		response.OutboundCID = "19296539941"
 		log.Printf("Applied route: 972792026281 -> 18454289532 with CID 19296539941")
-	
+
 	case "19296539941":
 		// If call from 18454289532 to 19296539941, prompt for DID
 		if cid == "18454289532" {
@@ -118,35 +118,35 @@ func routeCall(did, cid string) RoutingResponse {
 			response.OutboundCID = "972792026281"
 			log.Printf("Applied prompt rule: 18454289532 -> 19296539941 requires DID input")
 		}
-	
+
 	default:
 		// Use default provider for other numbers
 		log.Printf("Applied default routing rule for DID %s", did)
 	}
-	
+
 	return response
 }
 
 // validateDIDHandler validates a DID and returns routing info
 func validateDIDHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Received DID validation request from %s", r.RemoteAddr)
-	
+
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	
+
 	var req DIDValidationRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Printf("Error parsing JSON request: %v", err)
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
-	
+
 	log.Printf("Validating DID: %s", req.DID)
-	
+
 	response := validateDID(req.DID)
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Printf("Error encoding JSON response: %v", err)
@@ -164,7 +164,7 @@ func validateDID(did string) DIDValidationResponse {
 			Message: "DID too short, must be at least 10 digits",
 		}
 	}
-	
+
 	// Israeli numbers (972 prefix)
 	if len(did) >= 12 && did[:3] == "972" {
 		return DIDValidationResponse{
@@ -173,7 +173,7 @@ func validateDID(did string) DIDValidationResponse {
 			Provider: "freetelecom_outgoing",
 		}
 	}
-	
+
 	// US numbers (1 prefix)
 	if len(did) == 11 && did[0] == '1' {
 		return DIDValidationResponse{
@@ -182,7 +182,7 @@ func validateDID(did string) DIDValidationResponse {
 			Provider: "freetelecom_outgoing",
 		}
 	}
-	
+
 	// 10-digit US numbers
 	if len(did) == 10 {
 		return DIDValidationResponse{
@@ -191,7 +191,7 @@ func validateDID(did string) DIDValidationResponse {
 			Provider: "freetelecom_outgoing",
 		}
 	}
-	
+
 	return DIDValidationResponse{
 		Valid:   false,
 		Message: "Invalid DID format",
@@ -201,31 +201,31 @@ func validateDID(did string) DIDValidationResponse {
 // callLogHandler handles call logging requests from FreeSWITCH
 func callLogHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Received call log request from %s", r.RemoteAddr)
-	
+
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	
+
 	var req CallLogRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		log.Printf("Error parsing call log JSON request: %v", err)
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
-	
+
 	// Log the call data
 	log.Printf("Call Log: ID=%s, Caller=%s, Dest=%s, Event=%s, Provider=%s, Status=%s, Duration=%ds, Recording=%s",
 		req.CallID, req.CallerID, req.Destination, req.EventType, req.Provider, req.Status, req.Duration, req.RecordingFile)
-	
+
 	// Here you could store the call data in a database or file
 	// For now, we just log it
-	
+
 	response := CallLogResponse{
 		Success: true,
 		Message: "Call logged successfully",
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Printf("Error encoding call log response: %v", err)
@@ -247,28 +247,28 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	// Create HTTP server
 	mux := http.NewServeMux()
-	
+
 	// Register handlers
 	mux.HandleFunc("/route", routeHandler)
 	mux.HandleFunc("/validate-did", validateDIDHandler)
 	mux.HandleFunc("/call-log", callLogHandler)
 	mux.HandleFunc("/health", healthHandler)
-	
+
 	// Configure server
 	server := &http.Server{
-		Addr:    ":8080",
-		Handler: mux,
+		Addr:         ":8080",
+		Handler:      mux,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  30 * time.Second,
 	}
-	
+
 	log.Printf("Starting HTTP routing server on port 8080")
 	log.Printf("Routing endpoint: http://localhost:8080/route")
 	log.Printf("DID validation endpoint: http://localhost:8080/validate-did")
 	log.Printf("Call logging endpoint: http://localhost:8080/call-log")
 	log.Printf("Health check endpoint: http://localhost:8080/health")
-	
+
 	// Start server
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
