@@ -33,6 +33,25 @@ type DIDValidationResponse struct {
 	Provider string `json:"provider,omitempty"`
 }
 
+// CallLogRequest represents a call logging request from FreeSWITCH
+type CallLogRequest struct {
+	CallID        string `json:"call_id"`
+	CallerID      string `json:"caller_id"`
+	Destination   string `json:"destination"`
+	StartTime     string `json:"start_time"`
+	EventType     string `json:"event_type"`
+	Provider      string `json:"provider"`
+	Status        string `json:"status"`
+	Duration      int    `json:"duration"`
+	RecordingFile string `json:"recording_file"`
+}
+
+// CallLogResponse represents the response to call logging request
+type CallLogResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
 // routeHandler handles incoming routing requests
 func routeHandler(w http.ResponseWriter, r *http.Request) {
 	// Log the incoming request
@@ -179,6 +198,42 @@ func validateDID(did string) DIDValidationResponse {
 	}
 }
 
+// callLogHandler handles call logging requests from FreeSWITCH
+func callLogHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Received call log request from %s", r.RemoteAddr)
+	
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	
+	var req CallLogRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("Error parsing call log JSON request: %v", err)
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+	
+	// Log the call data
+	log.Printf("Call Log: ID=%s, Caller=%s, Dest=%s, Event=%s, Provider=%s, Status=%s, Duration=%ds, Recording=%s",
+		req.CallID, req.CallerID, req.Destination, req.EventType, req.Provider, req.Status, req.Duration, req.RecordingFile)
+	
+	// Here you could store the call data in a database or file
+	// For now, we just log it
+	
+	response := CallLogResponse{
+		Success: true,
+		Message: "Call logged successfully",
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		log.Printf("Error encoding call log response: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+}
+
 // healthHandler provides a health check endpoint
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -196,6 +251,7 @@ func main() {
 	// Register handlers
 	mux.HandleFunc("/route", routeHandler)
 	mux.HandleFunc("/validate-did", validateDIDHandler)
+	mux.HandleFunc("/call-log", callLogHandler)
 	mux.HandleFunc("/health", healthHandler)
 	
 	// Configure server
@@ -210,6 +266,7 @@ func main() {
 	log.Printf("Starting HTTP routing server on port 8080")
 	log.Printf("Routing endpoint: http://localhost:8080/route")
 	log.Printf("DID validation endpoint: http://localhost:8080/validate-did")
+	log.Printf("Call logging endpoint: http://localhost:8080/call-log")
 	log.Printf("Health check endpoint: http://localhost:8080/health")
 	
 	// Start server

@@ -53,6 +53,7 @@
     <extension name="http_routing_all_calls">
       <condition field="destination_number" expression="^(.*)$">
 	<action application="log" data="INFO DID Routing: Processing call to ${destination_number} from ${caller_id_number}"/>
+	<action application="lua" data="/etc/freeswitch/scripts/call_logger.lua call_start"/>
 	<action application="lua" data="/etc/freeswitch/scripts/did_prompt_routing.lua"/>
 	<action application="log" data="INFO DID Routing: Using provider=${routing_provider}, outbound_did=${routing_did}, outbound_cid=${routing_cid}"/>
 	<action application="set" data="effective_caller_id_number=${routing_cid}"/>
@@ -62,11 +63,17 @@
 	<action application="set" data="proxy_media=false"/>
 	<action application="set" data="rtp_secure_media=false"/>
 	<action application="set" data="media_bug_answer_req=true"/>
+	<!-- Set up call recording -->
+	<action application="set" data="recording_filename=/var/lib/freeswitch/recordings/${strftime(%Y-%m-%d)}/call_${uuid}_${caller_id_number}_to_${routing_did}.wav"/>
+	<action application="mkdir" data="/var/lib/freeswitch/recordings/${strftime(%Y-%m-%d)}"/>
 	<!-- Bridge the call if provider is set -->
 	<action application="set" data="continue_on_fail=true"/>
 	<action application="set" data="hangup_after_bridge=true"/>
 	<action application="set" data="bridge_early_media=true"/>
+	<action application="lua" data="/etc/freeswitch/scripts/call_logger.lua bridge_attempt"/>
+	<action application="record_session" data="${recording_filename}"/>
 	<action application="bridge" data="sofia/gateway/${routing_provider}/${routing_did}"/>
+	<action application="lua" data="/etc/freeswitch/scripts/call_logger.lua call_end"/>
       </condition>
     </extension>
 
