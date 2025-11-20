@@ -1,0 +1,247 @@
+openapi: 3.0.3
+info:
+  title: FreeSWITCH Routing Server API
+  description: HTTP API for FreeSWITCH routing server
+  version: 1.0.0
+  
+servers:
+  - url: http://localhost:8080
+    description: Local server
+
+paths:
+  /route:
+    post:
+      summary: Route call
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoutingRequest'
+            example:
+              did: "18005551234"
+              cid: "12345678901"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutingResponse'
+              example:
+                provider: "freetelecom_outgoing"
+                outbound_did: "972501234567"
+                outbound_cid: "18005551234"
+                prompt_did: false
+        '402':
+          description: Insufficient funds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsufficientFundsResponse'
+              example:
+                success: false
+                error: "Insufficient funds for international calling"
+                current_balance: 0.50
+                minimum_required: 1.00
+        '404':
+          description: Not found
+        '405':
+          description: Method not allowed
+
+  /validate-did:
+    post:
+      summary: Validate DID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DIDValidationRequest'
+            example:
+              did: "972501234567"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DIDValidationResponse'
+              example:
+                valid: true
+                message: "Valid Israeli DID"
+                provider: "freetelecom_outgoing"
+
+  /call-log:
+    post:
+      summary: Log call
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallLogRequest'
+            example:
+              call_id: "12345678-1234-1234-1234-123456789012"
+              caller_id: "18005551234"
+              destination: "972501234567"
+              start_time: "2025-01-15T10:30:00Z"
+              event_type: "call_end"
+              provider: "freetelecom_outgoing"
+              status: "completed"
+              duration: 180
+              recording_file: "/var/recordings/call_12345678.wav"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallLogResponse'
+              example:
+                success: true
+                message: "Call logged successfully"
+
+  /balance:
+    post:
+      summary: Check balance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BalanceCheckRequest'
+            example:
+              real_phone: "12345678901"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceCheckResponse'
+              example:
+                success: true
+                customer_id: 1001
+                balance: 25.50
+                message: "Balance retrieved successfully"
+
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  time:
+                    type: string
+              example:
+                status: "healthy"
+                time: "2025-01-15T10:30:00Z"
+
+components:
+  schemas:
+    RoutingRequest:
+      type: object
+      properties:
+        did:
+          type: string
+        cid:
+          type: string
+
+    RoutingResponse:
+      type: object
+      properties:
+        provider:
+          type: string
+        outbound_did:
+          type: string
+        outbound_cid:
+          type: string
+        prompt_did:
+          type: boolean
+
+    DIDValidationRequest:
+      type: object
+      properties:
+        did:
+          type: string
+
+    DIDValidationResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        message:
+          type: string
+        provider:
+          type: string
+
+    CallLogRequest:
+      type: object
+      properties:
+        call_id:
+          type: string
+        caller_id:
+          type: string
+        destination:
+          type: string
+        start_time:
+          type: string
+        event_type:
+          type: string
+        provider:
+          type: string
+        status:
+          type: string
+        duration:
+          type: integer
+        recording_file:
+          type: string
+
+    CallLogResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    BalanceCheckRequest:
+      type: object
+      properties:
+        customer_id:
+          type: string
+        real_phone:
+          type: string
+
+    BalanceCheckResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        customer_id:
+          type: integer
+          format: int64
+        balance:
+          type: number
+        message:
+          type: string
+
+    InsufficientFundsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          type: string
+        current_balance:
+          type: number
+        minimum_required:
+          type: number

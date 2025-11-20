@@ -1,0 +1,32 @@
+2025/07/21 20:32:50 Starting HTTP routing server on port 8080
+2025/07/21 20:32:50 Routing endpoint: http://localhost:8080/route
+2025/07/21 20:32:50 DID validation endpoint: http://localhost:8080/validate-did
+2025/07/21 20:32:50 Health check endpoint: http://localhost:8080/health
+2025/07/21 20:32:59 Received routing request from 127.0.0.1:41966
+2025/07/21 20:32:59 Routing request: DID=19296539941, CID=18454289532
+2025/07/21 20:32:59 Applied prompt rule: 18454289532 -> 19296539941 requires DID input
+2025/07/21 20:32:59 Routing response: Provider=, OutboundDID=, OutboundCID=972792026281
+2025/07/21 20:33:55 Received routing request from 127.0.0.1:59968
+2025/07/21 20:33:55 Routing request: DID=19296539941, CID=18454289532
+2025/07/21 20:33:55 Applied prompt rule: 18454289532 -> 19296539941 requires DID input
+2025/07/21 20:33:55 Routing response: Provider=, OutboundDID=, OutboundCID=972792026281
+2025/07/21 20:34:05 Received DID validation request from 127.0.0.1:60350
+2025/07/21 20:34:05 Validating DID: 972527121102
+2025/07/21 20:34:27 Received routing request from 127.0.0.1:39154
+2025/07/21 20:34:27 Routing request: DID=19296539941, CID=18454289532
+2025/07/21 20:34:27 Applied prompt rule: 18454289532 -> 19296539941 requires DID input
+2025/07/21 20:34:27 Routing response: Provider=, OutboundDID=, OutboundCID=972792026281
+2025/07/21 20:34:39 Received DID validation request from 127.0.0.1:36908
+2025/07/21 20:34:39 Validating DID: 972527121102
+2025/07/21 20:56:49 Received routing request from 127.0.0.1:48838
+2025/07/21 20:56:49 Routing request: DID=19296539941, CID=18454289532
+2025/07/21 20:56:49 Applied prompt rule: 18454289532 -> 19296539941 requires DID input
+2025/07/21 20:56:49 Routing response: Provider=, OutboundDID=, OutboundCID=972792026281
+2025/07/21 20:57:00 Received DID validation request from 127.0.0.1:50410
+2025/07/21 20:57:00 Validating DID: 972527121102
+2025/07/29 19:43:08 Received routing request from 127.0.0.1:53736
+2025/07/29 19:43:08 Routing request: DID=1234567890, CID=9876543210
+2025/07/29 19:43:08 Applied default routing rule for DID 1234567890
+2025/07/29 19:43:08 Routing response: Provider=provider1_outgoing, OutboundDID=1234567890, OutboundCID=9876543210
+2025/07/29 19:43:15 Received DID validation request from 127.0.0.1:57858
+2025/07/29 19:43:15 Validating DID: 5551234567

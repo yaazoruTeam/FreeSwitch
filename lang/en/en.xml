@@ -1,0 +1,7 @@
+<include>
+  <language name="en" say-module="en" sound-prefix="$${sounds_dir}/en/us/callie" tts-engine="flite" tts-voice="rms">
+    <X-PRE-PROCESS cmd="include" data="demo/*.xml"/>
+    <X-PRE-PROCESS cmd="include" data="vm/*.xml"/>
+    <X-PRE-PROCESS cmd="include" data="dir/*.xml"/>
+  </language>
+</include>
