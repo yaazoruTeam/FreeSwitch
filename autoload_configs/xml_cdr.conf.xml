@@ -1,0 +1,31 @@
+<configuration name="xml_cdr.conf" description="XML CDR Configuration">
+  <settings>
+    <!-- Log CDRs to HTTP endpoint -->
+    <param name="url" value="http://172.31.14.160:3000/api/call-log/cdr"/>
+    
+    <!-- Retry settings -->
+    <param name="retries" value="3"/>
+    <param name="delay" value="120"/>
+    
+    <!-- Disable file logging (we're using HTTP only) -->
+    <param name="log-dir" value=""/>
+    
+    <!-- Post CDR as JSON -->
+    <param name="encode" value="true"/>
+    <param name="encode-values" value="true"/>
+    
+    <!-- Timeout settings -->
+    <param name="timeout" value="5"/>
+    
+    <!-- Log b-leg (outbound leg) as well -->
+    <param name="log-b-leg" value="true"/>
+    
+    <!-- Only log on hangup -->
+    <param name="skip-bridge" value="true"/>
+    
+    <!-- Authentication (if needed) -->
+    <!--<param name="auth-scheme" value="basic"/>-->
+    <!--<param name="username" value="your_user"/>-->
+    <!--<param name="password" value="your_pass"/>-->
+  </settings>
+</configuration>

@@ -33,5 +33,8 @@
     <!-- Minimal Language Support -->
     <load module="mod_say_en"/>         <!-- English TTS -->
     
+    <!-- CDR Module for Call Logging -->
+    <load module="mod_xml_cdr"/>        <!-- XML CDR to HTTP -->
+    
   </modules>
 </configuration>
